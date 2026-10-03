@@ -28,5 +28,5 @@ Decisões e justificativas em [docs/DECISOES.md](docs/DECISOES.md).
 
 ## Uso de IA neste projeto
 
-Parte do código foi escrita com apoio do Claude Code. Os commits trazem o trailer
-`Co-Authored-By`. Cada etapa é revisada e entendida antes de seguir para a próxima.
+Parte do código foi escrita com apoio do Claude Code, por isso os commits trazem o
+`Co-Authored-By`. Ainda sim, cada etapa é sistematicamente revisada e entendida antes de seguir para a próxima.

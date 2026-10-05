@@ -1,18 +1,27 @@
 import json
+import uuid
 from contextlib import ExitStack
 
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app import config
+from app.chunking import dividir_em_trechos
+from app.embeddings import gerar_embeddings
+from app.store import armazenamento
 
 app = FastAPI(title="docs-assistant ai-service")
 
 
 class ChatRequest(BaseModel):
     pergunta: str
+
+
+class DocumentoRequest(BaseModel):
+    nome: str = Field(min_length=1)
+    texto: str = Field(min_length=1)
 
 
 @app.get("/health")
@@ -59,6 +68,25 @@ def chat(req: ChatRequest):
         # done_reason "length" significa que o num_predict cortou a resposta.
         "truncada": dados.get("done_reason") == "length",
     }
+
+
+@app.post("/documentos", status_code=201)
+def indexar_documento(req: DocumentoRequest):
+    trechos = dividir_em_trechos(req.texto)
+    if not trechos:
+        raise HTTPException(422, "O texto do documento está vazio.")
+    try:
+        vetores = gerar_embeddings(trechos)
+    except httpx.HTTPError as exc:
+        raise _erro_http(exc) from exc
+    documento_id = str(uuid.uuid4())
+    armazenamento.adicionar(documento_id, req.nome, trechos, vetores)
+    return {"id": documento_id, "nome": req.nome, "trechos": len(trechos)}
+
+
+@app.get("/documentos")
+def listar_documentos():
+    return armazenamento.resumo_por_documento()
 
 
 def _eventos_sse(resposta: httpx.Response, conexao: ExitStack):

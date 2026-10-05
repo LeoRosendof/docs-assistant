@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from app import config
 from app.chunking import dividir_em_trechos
 from app.embeddings import gerar_embeddings
+from app.search import buscar_trechos
 from app.store import armazenamento
 
 app = FastAPI(title="docs-assistant ai-service")
@@ -22,6 +23,11 @@ class ChatRequest(BaseModel):
 class DocumentoRequest(BaseModel):
     nome: str = Field(min_length=1)
     texto: str = Field(min_length=1)
+
+
+class BuscaRequest(BaseModel):
+    pergunta: str = Field(min_length=1)
+    k: int = Field(default=3, ge=1, le=10)
 
 
 @app.get("/health")
@@ -87,6 +93,29 @@ def indexar_documento(req: DocumentoRequest):
 @app.get("/documentos")
 def listar_documentos():
     return armazenamento.resumo_por_documento()
+
+
+@app.post("/buscar")
+def buscar(req: BuscaRequest):
+    if not armazenamento.trechos:
+        return {"resultados": []}
+    try:
+        # A pergunta pode usar um prefixo diferente do usado nos trechos (conforme o modelo).
+        [vetor] = gerar_embeddings([req.pergunta], prefixo=config.EMBED_PREFIXO_PERGUNTA)
+    except httpx.HTTPError as exc:
+        raise _erro_http(exc) from exc
+    melhores = buscar_trechos(vetor, armazenamento.trechos, req.k)
+    return {
+        "resultados": [
+            {
+                "documento": t.documento_nome,
+                "posicao": t.posicao,
+                "texto": t.texto,
+                "score": round(score, 4),
+            }
+            for t, score in melhores
+        ]
+    }
 
 
 def _eventos_sse(resposta: httpx.Response, conexao: ExitStack):

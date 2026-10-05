@@ -72,7 +72,7 @@ def chat(req: ChatRequest):
 
 @app.post("/documentos", status_code=201)
 def indexar_documento(req: DocumentoRequest):
-    trechos = dividir_em_trechos(req.texto)
+    trechos = dividir_em_trechos(req.texto, config.CHUNK_TAMANHO, config.CHUNK_SOBREPOSICAO)
     if not trechos:
         raise HTTPException(422, "O texto do documento está vazio.")
     try:

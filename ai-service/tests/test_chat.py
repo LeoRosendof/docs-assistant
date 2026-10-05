@@ -21,7 +21,7 @@ def test_chat_devolve_resposta_do_modelo(monkeypatch):
     response = client.post("/chat", json={"pergunta": "O que é RAG?"})
 
     assert response.status_code == 200
-    assert response.json() == {"resposta": "resposta de teste"}
+    assert response.json() == {"resposta": "resposta de teste", "truncada": False}
 
 
 def test_chat_usa_url_modelo_e_timeout_da_configuracao(monkeypatch):

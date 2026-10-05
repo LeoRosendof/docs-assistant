@@ -41,5 +41,5 @@ def test_chat_stream_repassa_cada_pedaco_como_evento_sse(monkeypatch):
         'data: "Olá"\n\n'
         'data: ", mundo\\n"\n\n'
         'data: "!"\n\n'
-        "event: fim\ndata: {}\n\n"
+        'event: fim\ndata: {"truncada": false}\n\n'
     )

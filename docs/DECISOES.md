@@ -45,3 +45,12 @@ facilita acertar o top 3 por acaso; por isso escolhi 1000 e não 1500, que parec
 com mais risco de ajuste excessivo a este documento. Duas perguntas (strings de busca e
 PI/ECO) continuaram ruins mesmo com o bge-m3, porque a resposta fica no meio de trechos com
 conteúdo misturado. Texto riscado no PDF original também é extraído como se fosse válido.
+
+## 005 - Backend: Spring Boot 4.1 com Gradle, escrito à mão
+O backend usa Java 21, Spring Boot 4.1.1 e Gradle (`gradlew`), como combinado. O gerador
+oficial (start.spring.io) devolveu erro 500 para qualquer projeto Gradle no dia, e só o Maven
+funcionava. Em vez de trocar de ferramenta, usei o projeto Maven gerado apenas para copiar a
+estrutura e os nomes dos starters do Boot 4 (que mudaram, por exemplo
+`spring-boot-starter-webmvc`), escrevi o `build.gradle` à mão e gerei o wrapper com o Gradle
+9.8.0, baixado com o checksum conferido. Banco: H2 por enquanto, para o backend rodar sem
+instalar nada; a troca por um banco de verdade fica para o `docker-compose`.

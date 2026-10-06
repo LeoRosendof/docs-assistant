@@ -25,6 +25,17 @@ class ArmazenamentoTrechos:
         for posicao, (texto, vetor) in enumerate(zip(textos, vetores, strict=True)):
             self.trechos.append(Trecho(documento_id, nome, posicao, texto, vetor))
 
+    def remover(self, documento_id: str) -> int:
+        """Apaga os trechos de um documento e devolve quantos eram (0 se não existia)."""
+        antes = len(self.trechos)
+        self.trechos = [t for t in self.trechos if t.documento_id != documento_id]
+        return antes - len(self.trechos)
+
+    def substituir(self, documento_id: str, nome: str, textos: list[str], vetores: list[list[float]]):
+        """Troca os trechos de um documento pelos novos, para reindexar sem duplicar."""
+        self.remover(documento_id)
+        self.adicionar(documento_id, nome, textos, vetores)
+
     def resumo_por_documento(self) -> list[dict]:
         documentos: dict[str, dict] = {}
         for t in self.trechos:

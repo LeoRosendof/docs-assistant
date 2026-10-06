@@ -22,6 +22,9 @@ class ChatRequest(BaseModel):
 
 
 class DocumentoRequest(BaseModel):
+    # Id de quem é dono do documento (o backend). Se vier, reindexar o mesmo id
+    # substitui os trechos antigos; se não vier, o serviço gera um.
+    id: str | None = Field(default=None, min_length=1, max_length=100)
     nome: str = Field(min_length=1)
     texto: str = Field(min_length=1)
 
@@ -103,9 +106,17 @@ def indexar_documento(req: DocumentoRequest):
         vetores = gerar_embeddings(trechos)
     except httpx.HTTPError as exc:
         raise _erro_http(exc) from exc
-    documento_id = str(uuid.uuid4())
-    armazenamento.adicionar(documento_id, req.nome, trechos, vetores)
+    documento_id = req.id or str(uuid.uuid4())
+    # Os vetores já foram gerados: se o Ollama tivesse falhado, o documento antigo
+    # continuaria intacto, e só agora ele é trocado.
+    armazenamento.substituir(documento_id, req.nome, trechos, vetores)
     return {"id": documento_id, "nome": req.nome, "trechos": len(trechos)}
+
+
+@app.delete("/documentos/{documento_id}", status_code=204)
+def remover_documento(documento_id: str):
+    if armazenamento.remover(documento_id) == 0:
+        raise HTTPException(404, "Documento não encontrado.")
 
 
 @app.get("/documentos")

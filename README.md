@@ -24,8 +24,9 @@ React (chat)  ->  Spring Boot (API REST)  ->  FastAPI (serviço de IA/RAG)  ->  
 
 | Rota | O que faz |
 |---|---|
-| `POST /documentos` | Divide um texto em trechos, gera os embeddings e guarda na memória |
+| `POST /documentos` | Divide um texto em trechos, gera os embeddings e guarda na memória. Aceita um `id` opcional: reindexar o mesmo `id` substitui os trechos antigos |
 | `GET /documentos` | Lista os documentos indexados |
+| `DELETE /documentos/{id}` | Remove os trechos de um documento |
 | `POST /buscar` | Devolve os trechos mais parecidos com uma pergunta, com o score de cada um |
 | `POST /perguntar` | **RAG:** busca os trechos, monta o prompt com o contexto e responde citando as fontes |
 | `POST /chat` | Pergunta direta ao modelo, sem documentos (serve de comparação) |

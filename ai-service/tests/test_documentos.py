@@ -117,3 +117,57 @@ def test_indexar_documento_devolve_503_e_nao_guarda_nada_se_ollama_cair(monkeypa
 
     assert response.status_code == 503
     assert client.get("/documentos").json() == []
+
+
+def _indexar(monkeypatch, texto="uma frase curta", **extra):
+    monkeypatch.setattr("app.main.gerar_embeddings", lambda textos: [[1.0, 0.0]] * len(textos))
+    return client.post("/documentos", json={"nome": "doc", "texto": texto, **extra})
+
+
+def test_indexar_com_id_externo_usa_esse_id(monkeypatch):
+    response = _indexar(monkeypatch, id="42")
+
+    assert response.status_code == 201
+    assert response.json()["id"] == "42"
+    assert [d["id"] for d in client.get("/documentos").json()] == ["42"]
+
+
+def test_reindexar_o_mesmo_id_substitui_os_trechos_em_vez_de_duplicar(monkeypatch):
+    longo = " ".join(f"palavra{i}" for i in range(400))
+    _indexar(monkeypatch, texto=longo, id="42")
+    _indexar(monkeypatch, texto="agora só uma frase", id="42")
+
+    documentos = client.get("/documentos").json()
+
+    assert documentos == [{"id": "42", "nome": "doc", "trechos": 1}]
+
+
+def test_reindexar_preserva_o_documento_antigo_se_o_ollama_falhar(monkeypatch):
+    _indexar(monkeypatch, texto="versão antiga", id="42")
+
+    def falha(textos):
+        raise httpx.ConnectError("recusada", request=REQ)
+
+    monkeypatch.setattr("app.main.gerar_embeddings", falha)
+    response = client.post("/documentos", json={"id": "42", "nome": "doc", "texto": "versão nova"})
+
+    assert response.status_code == 503
+    assert client.get("/documentos").json() == [{"id": "42", "nome": "doc", "trechos": 1}]
+
+
+def test_indexar_com_id_vazio_devolve_422(monkeypatch):
+    assert _indexar(monkeypatch, id="").status_code == 422
+
+
+def test_remover_apaga_so_os_trechos_daquele_documento(monkeypatch):
+    _indexar(monkeypatch, id="a")
+    _indexar(monkeypatch, id="b")
+
+    response = client.delete("/documentos/a")
+
+    assert response.status_code == 204
+    assert [d["id"] for d in client.get("/documentos").json()] == ["b"]
+
+
+def test_remover_documento_inexistente_devolve_404():
+    assert client.delete("/documentos/nao-existe").status_code == 404

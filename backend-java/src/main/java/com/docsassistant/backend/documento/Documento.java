@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +33,14 @@ public class Documento {
 	@Column(nullable = false, updatable = false)
 	private Instant criadoEm;
 
+	// O default no banco permite que o ddl-auto=update acrescente a coluna a uma base já existente.
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'PENDENTE'")
+	private StatusIndexacao status = StatusIndexacao.PENDENTE;
+
+	// Em quantos trechos o ai-service dividiu o documento; nulo enquanto não foi indexado.
+	private Integer trechos;
+
 	protected Documento() {
 	}
 
@@ -43,6 +53,16 @@ public class Documento {
 	@PrePersist
 	void aoCriar() {
 		this.criadoEm = Instant.now();
+	}
+
+	public void marcarIndexado(int trechos) {
+		this.status = StatusIndexacao.INDEXADO;
+		this.trechos = trechos;
+	}
+
+	public void marcarFalha() {
+		this.status = StatusIndexacao.FALHOU;
+		this.trechos = null;
 	}
 
 	public Long getId() {
@@ -63,6 +83,14 @@ public class Documento {
 
 	public Instant getCriadoEm() {
 		return criadoEm;
+	}
+
+	public StatusIndexacao getStatus() {
+		return status;
+	}
+
+	public Integer getTrechos() {
+		return trechos;
 	}
 
 }

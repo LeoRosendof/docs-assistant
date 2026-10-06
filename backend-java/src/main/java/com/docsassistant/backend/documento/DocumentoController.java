@@ -45,6 +45,11 @@ public class DocumentoController {
 		return service.buscar(id);
 	}
 
+	@PostMapping("/{id}/indexar")
+	public DocumentoResponse reindexar(@PathVariable Long id) {
+		return service.reindexar(id);
+	}
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> remover(@PathVariable Long id) {
 		service.remover(id);

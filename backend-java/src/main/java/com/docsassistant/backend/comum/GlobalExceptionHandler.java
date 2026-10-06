@@ -38,6 +38,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return problema;
 	}
 
+	@ExceptionHandler(ServicoIaException.class)
+	ProblemDetail servicoIa(ServicoIaException ex) {
+		ProblemDetail problema = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
+		problema.setTitle(titulo(ex.getStatus().value()));
+		return problema;
+	}
+
 	// Rede de segurança: o cliente nunca vê stack trace nem mensagem interna.
 	@ExceptionHandler(Exception.class)
 	ProblemDetail erroInesperado(Exception ex) {
@@ -93,6 +100,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			case 405 -> "Método não permitido";
 			case 415 -> "Tipo de conteúdo não suportado";
 			case 500 -> "Erro interno";
+			case 502 -> "Falha no serviço de IA";
+			case 503 -> "Serviço de IA indisponível";
+			case 504 -> "Serviço de IA demorou demais";
 			default -> "Erro";
 		};
 	}

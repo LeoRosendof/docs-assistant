@@ -4,7 +4,8 @@ Assistente de perguntas e respostas sobre documentos (RAG), construído como pro
 para praticar integração fullstack com IA.
 
 > **Status:** em construção. O `ai-service` (RAG) está pronto e testado; o backend Java está
-> em andamento (documentos com CRUD, validação e paginação) e o frontend ainda não foi
+> em andamento (documentos, erros padronizados, integração com o `ai-service` e histórico de
+> perguntas) e o frontend ainda não foi
 > começado. O histórico de commits é parte do projeto: mostra como cada decisão foi tomada,
 > incluindo erros e correções.
 
@@ -107,8 +108,8 @@ em [docs/DECISOES.md](docs/DECISOES.md) (decisão 004).
 ## Roadmap
 
 1. [x] `ai-service`: chamada simples ao LLM -> configuração -> streaming -> tratamento de erros -> RAG
-2. [ ] `backend-java`: ~~CRUD, validação, paginação~~ feito; faltam erros padronizados,
-   integração com o `ai-service` e OpenAPI
+2. [ ] `backend-java`: CRUD, validação, paginação, erros padronizados e integração com o
+   `ai-service` feitos; falta a documentação OpenAPI
 3. [ ] `frontend` e `docker-compose`
 
 Decisões e justificativas em [docs/DECISOES.md](docs/DECISOES.md).

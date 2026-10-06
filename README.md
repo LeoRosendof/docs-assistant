@@ -3,9 +3,10 @@
 Assistente de perguntas e respostas sobre documentos (RAG), construído como projeto de estudo
 para praticar integração fullstack com IA.
 
-> **Status:** em construção. O `ai-service` (RAG) está pronto e testado; o backend Java e o
-> frontend ainda não foram começados. O histórico de commits é parte do projeto: mostra como
-> cada decisão foi tomada, incluindo erros e correções.
+> **Status:** em construção. O `ai-service` (RAG) está pronto e testado; o backend Java está
+> em andamento (documentos com CRUD, validação e paginação) e o frontend ainda não foi
+> começado. O histórico de commits é parte do projeto: mostra como cada decisão foi tomada,
+> incluindo erros e correções.
 
 ## Arquitetura planejada
 
@@ -16,7 +17,7 @@ React (chat)  ->  Spring Boot (API REST)  ->  FastAPI (serviço de IA/RAG)  ->  
 | Pasta          | Papel                                              | Stack                 | Situação      |
 |----------------|----------------------------------------------------|-----------------------|---------------|
 | `ai-service/`  | Embeddings, busca semântica, chamada ao LLM        | Python, FastAPI       | pronto        |
-| `backend-java/`| Conversas, documentos, contrato REST com o frontend| Java, Spring Boot     | não iniciado  |
+| `backend-java/`| Conversas, documentos, contrato REST com o frontend| Java, Spring Boot     | em andamento  |
 | `frontend/`    | Interface de chat                                  | React, yarn           | não iniciado  |
 
 ## O que o ai-service faz hoje
@@ -105,7 +106,8 @@ em [docs/DECISOES.md](docs/DECISOES.md) (decisão 004).
 ## Roadmap
 
 1. [x] `ai-service`: chamada simples ao LLM -> configuração -> streaming -> tratamento de erros -> RAG
-2. [ ] `backend-java`: CRUD, validação, erros padronizados, paginação, OpenAPI
+2. [ ] `backend-java`: ~~CRUD, validação, paginação~~ feito; faltam erros padronizados,
+   integração com o `ai-service` e OpenAPI
 3. [ ] `frontend` e `docker-compose`
 
 Decisões e justificativas em [docs/DECISOES.md](docs/DECISOES.md).

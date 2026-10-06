@@ -12,7 +12,13 @@ OLLAMA_EMBED_MODELO = os.getenv("OLLAMA_EMBED_MODELO", "bge-m3")
 # (o nomic usa "search_document: " e "search_query: "); o bge-m3 não usa nenhum.
 EMBED_PREFIXO_DOCUMENTO = os.getenv("EMBED_PREFIXO_DOCUMENTO", "")
 EMBED_PREFIXO_PERGUNTA = os.getenv("EMBED_PREFIXO_PERGUNTA", "")
-CHUNK_TAMANHO = int(os.getenv("CHUNK_TAMANHO", "1000"))
+# Abaixo deste score o trecho é considerado irrelevante e o modelo nem é chamado.
+# Escolhido entre perguntas sem relação (0,28 a 0,37) e relevantes (a partir de 0,45)
+# medidas com o bge-m3 (DECISOES.md, 004); o valor depende do modelo de embedding.
+RAG_SCORE_MINIMO = float(os.getenv("RAG_SCORE_MINIMO", "0.40"))
+# Temperatura 0 deixa a resposta com contexto estável entre execuções.
+RAG_TEMPERATURA = float(os.getenv("RAG_TEMPERATURA", "0"))
+CHUNK_TAMANHO =int(os.getenv("CHUNK_TAMANHO", "1000"))
 CHUNK_SOBREPOSICAO = int(os.getenv("CHUNK_SOBREPOSICAO", "200"))
 # Limite de tokens por resposta. Sem ele, o modelo pode entrar em loop de repetição
 # e só parar ao esgotar o contexto (observado com a pergunta "O que é RAG?").

@@ -1,12 +1,11 @@
 package com.docsassistant.backend.documento;
 
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.docsassistant.backend.comum.PaginaResponse;
+import com.docsassistant.backend.comum.RecursoNaoEncontradoException;
 
 @Service
 public class DocumentoService {
@@ -39,7 +38,7 @@ public class DocumentoService {
 
 	private Documento obter(Long id) {
 		return repository.findById(id).orElseThrow(
-				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Documento " + id + " não encontrado."));
+				() -> new RecursoNaoEncontradoException("Documento " + id + " não encontrado."));
 	}
 
 }

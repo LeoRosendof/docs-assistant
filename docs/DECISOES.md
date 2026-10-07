@@ -54,3 +54,38 @@ estrutura e os nomes dos starters do Boot 4 (que mudaram, por exemplo
 `spring-boot-starter-webmvc`), escrevi o `build.gradle` à mão e gerei o wrapper com o Gradle
 9.8.0, baixado com o checksum conferido. Banco: H2 por enquanto, para o backend rodar sem
 instalar nada; a troca por um banco de verdade fica para o `docker-compose`.
+
+## 006 - Validação em um segundo documento
+As decisões anteriores (modelo de embedding, trechos de 1000 caracteres, score mínimo de 0,40)
+foram calibradas em um único PDF. Para saber se elas se sustentam, testei em outro documento,
+de assunto e formato bem diferentes: 59 páginas de artigos de matemática, com fórmulas e
+figuras (~73 mil caracteres, 91 trechos). Escrevi 12 perguntas com resposta conhecida e, como
+esse documento passou a ser o teste independente, **não ajustei nenhum parâmetro depois de ver
+os resultados**.
+
+| Medida | Resultado |
+|---|---|
+| Trecho certo em 1º lugar | 8 de 12 |
+| Trecho certo entre os 4 usados pelo `/perguntar` | 11 de 12 |
+| Respostas corretas | 10 de 12 |
+| Recusas ("Não encontrei") | 2 de 12 |
+| Respostas erradas | 0 de 12 |
+| Perguntas fora do documento recusadas | 2 de 2 |
+
+**As duas recusas:** uma pergunta sobre a Torre de Hanói (o trecho certo ficou em 6º lugar,
+fora dos 4 que entram no prompt) e uma sobre o autor de um artigo (o trecho estava em 2º, mas o
+modelo não achou o nome, que fica no cabeçalho).
+
+**O que isto corrige:** o score mínimo de 0,40 **não separou** relevante de irrelevante neste
+documento. Uma pergunta sem relação ("Como fazer um bolo de chocolate?") pontuou 0,455 e passou
+do limite, enquanto as relevantes ficaram entre 0,50 e 0,73. No primeiro documento a separação
+parecia clara (0,28 a 0,37 contra 0,45 ou mais), mas era um efeito daquela amostra. Quem impediu
+a invenção aqui foi a regra de recusa do prompt, e o modelo recusou. Conclusão: o limite serve
+para economizar uma chamada ao modelo quando a pergunta é obviamente de outro assunto, mas **não
+deve ser tratado como garantia**; a proteção real é o prompt, que depende do comportamento do
+modelo.
+
+**Limitações:** são 12 perguntas que eu mesmo escrevi, em um documento só, e as respostas
+corretas foram conferidas por mim. Para o texto extraído do PDF, conferi que todas as respostas
+esperadas existem nele, então as falhas são da busca ou do modelo, não da extração. O PDF não
+está no repositório (é material de terceiros, com direitos autorais).

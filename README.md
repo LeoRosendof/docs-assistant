@@ -90,6 +90,12 @@ perguntas com resposta conhecida, só 2 acharam o trecho certo em 1º lugar. Tro
 `bge-m3`, que chegou a 5 de 9. A tabela completa, a hipótese e as limitações da medição estão
 em [docs/DECISOES.md](docs/DECISOES.md) (decisão 004).
 
+Depois testei em um segundo documento, bem diferente (59 páginas de artigos de matemática, com
+fórmulas), com 12 perguntas escritas só para esse teste e sem ajustar nenhum parâmetro com
+base nelas: o trecho certo ficou em 1º lugar em 8 e entre os 4 usados pelo `/perguntar` em 11;
+das respostas, 10 saíram corretas, 2 foram recusas e nenhuma foi errada. Detalhes e ressalvas
+na decisão 006.
+
 ## Limitações conhecidas
 
 - **Recuperação imperfeita:** a pergunta sobre as strings de busca não acha o trecho certo,

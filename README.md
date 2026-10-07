@@ -3,11 +3,11 @@
 Assistente de perguntas e respostas sobre documentos (RAG), construído como projeto de estudo
 para praticar integração fullstack com IA.
 
-> **Status:** em construção. O `ai-service` (RAG) está pronto e testado; o backend Java está
-> em andamento (documentos, erros padronizados, integração com o `ai-service` e histórico de
-> perguntas) e o frontend ainda não foi
-> começado. O histórico de commits é parte do projeto: mostra como cada decisão foi tomada,
-> incluindo erros e correções.
+> **Status:** em construção. O `ai-service` (RAG) está pronto e testado; o backend Java
+> (`backend-java`) também: documentos, perguntas com histórico, erros padronizados, integração
+> com o `ai-service` e documentação OpenAPI. O frontend ainda não foi começado. O histórico
+> de commits é parte do projeto: mostra como cada decisão foi tomada, incluindo erros e
+> correções.
 
 ## Arquitetura planejada
 
@@ -18,7 +18,7 @@ React (chat)  ->  Spring Boot (API REST)  ->  FastAPI (serviço de IA/RAG)  ->  
 | Pasta          | Papel                                              | Stack                 | Situação      |
 |----------------|----------------------------------------------------|-----------------------|---------------|
 | `ai-service/`  | Embeddings, busca semântica, chamada ao LLM        | Python, FastAPI       | pronto        |
-| `backend-java/`| Conversas, documentos, contrato REST com o frontend| Java, Spring Boot     | em andamento  |
+| `backend-java/`| Conversas, documentos, contrato REST com o frontend| Java, Spring Boot     | pronto        |
 | `frontend/`    | Interface de chat                                  | React, yarn           | não iniciado  |
 
 ## O que o ai-service faz hoje
@@ -65,6 +65,34 @@ URL, modelos, timeout, tamanho dos trechos e score mínimo são configuráveis p
 ambiente; veja [`ai-service/.env.example`](ai-service/.env.example). O armazenamento é em
 memória: ao reiniciar o serviço, os documentos precisam ser indexados de novo.
 
+## Como rodar o backend-java
+
+Pré-requisitos: Java 21 e o `ai-service` rodando na porta 8000 (veja acima). O Gradle vem no
+projeto (`gradlew`), não precisa instalar.
+
+```powershell
+cd backend-java
+.\gradlew.bat bootRun
+```
+
+A API fica em <http://localhost:8080> e a documentação interativa (OpenAPI) em
+<http://localhost:8080/swagger-ui/index.html>; a especificação em JSON está em `/v3/api-docs`.
+Os documentos ficam em um banco H2 em arquivo (`backend-java/data/`, fora do git). Os testes
+(`.\gradlew.bat test`) simulam o `ai-service` e usam um banco em memória.
+
+| Rota | O que faz |
+|---|---|
+| `POST /api/documentos` | Salva um texto e o indexa no `ai-service`; se a indexação falhar, o texto fica salvo com status `FALHOU` |
+| `GET /api/documentos` | Lista paginada (sem o texto) |
+| `GET /api/documentos/{id}` | Documento com o texto completo |
+| `POST /api/documentos/{id}/indexar` | Tenta indexar de novo |
+| `DELETE /api/documentos/{id}` | Apaga o documento e o tira do índice |
+| `POST /api/perguntas` | Pergunta aos documentos; devolve a resposta e as fontes e guarda no histórico |
+| `GET /api/perguntas` | Histórico paginado |
+
+Todos os erros saem no formato `application/problem+json` (RFC 7807); falhas do `ai-service`
+viram 502, 503 ou 504.
+
 ## Antes e depois do RAG
 
 O mesmo modelo (`llama3.1:8b`), a mesma pergunta, com e sem o documento indexado. O documento
@@ -109,13 +137,16 @@ na decisão 006.
   "anteriores ao ano de 2014 ?", com um ponto de interrogação, e a resposta apresenta o ano como
   fato.
 - **Não responde perguntas gerais** (por escolha): fora do documento, ele recusa.
-- **Armazenamento em memória** e **sem streaming** no `/perguntar`.
+- **O índice do `ai-service` é em memória.** Se ele reiniciar, o backend continua mostrando
+  `INDEXADO` para documentos que já não estão no índice; é preciso reindexar um a um
+  (`POST /api/documentos/{id}/indexar`).
+- **Sem streaming** no `/perguntar`, e as fontes de uma resposta não ficam no histórico.
 
 ## Roadmap
 
 1. [x] `ai-service`: chamada simples ao LLM -> configuração -> streaming -> tratamento de erros -> RAG
-2. [ ] `backend-java`: CRUD, validação, paginação, erros padronizados e integração com o
-   `ai-service` feitos; falta a documentação OpenAPI
+2. [x] `backend-java`: CRUD, validação, paginação, erros padronizados, integração com o
+   `ai-service` e OpenAPI
 3. [ ] `frontend` e `docker-compose`
 
 Decisões e justificativas em [docs/DECISOES.md](docs/DECISOES.md).
